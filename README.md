@@ -429,13 +429,7 @@ FIREBASE_CREDENTIALS_PATH=/path/to/your/firebase/credentials.json
 
 ### Hosting and Deployment
 
-This API can be hosted on various platforms such as:
-
-- **Heroku**: [Heroku Documentation](https://devcenter.heroku.com/articles/git)
-- **AWS**: [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/)
-- **Google Cloud**: [Google Cloud App Engine](https://cloud.google.com/appengine)
-
-To deploy on your chosen platform, follow the deployment instructions specific to that platform.
+This API is hosted on vercel app.
 
 ### Security Considerations
 
