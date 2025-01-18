@@ -1,4 +1,3 @@
-
 # Aura Hunt
 
 Welcome to **Aura Hunt**, a thrilling interactive scavenger hunt game designed for the new Grade 10 students of STEM High School for Boys - 6th of October! This adventure will take you through mysteries, challenges, and unforgettable teamwork experiences.
@@ -42,6 +41,7 @@ Aura Hunt is inspired by the concept of human energy fields, or auras. The compe
 Your mission? Tap into these layers, solve mysteries, complete challenges, and lead your team to victory while building lasting friendships and memories.
 
 ---
+
 ## 🎮 Demo Challenges
 
 Here are some exciting demos to try out:
@@ -143,3 +143,323 @@ Get ready to unlock the mysteries of your aura and embark on an adventure filled
 - **Postman**: For testing and debugging API endpoints.
 - **Git**: Version control for collaborative development.
 - **SASS Compiler**: Automated stylesheets for clean and responsive design.
+
+---
+
+## API Documentation
+
+Below you will find a comprehensive guide to the AuraHunt API, which can be used by developers and organizers to interact with the game data, scores, and more.
+
+### Table of Contents
+1. [Introduction](#introduction)
+2. [API Base URL](#api-base-url)
+3. [Authentication](#authentication)
+4. [CORS Configuration](#cors-configuration)
+5. [Endpoints](#endpoints)
+   - [Edit Score](#edit-score)
+   - [Toggle Checked Status](#toggle-checked-status)
+   - [Toggle Solved Status](#toggle-solved-status)
+   - [Correct Question](#correct-question)
+   - [Upload File](#upload-file)
+   - [Team Login](#team-login)
+   - [Generate JSON](#generate-json)
+   - [Fetch Team Aura Scores](#fetch-team-aura-scores)
+6. [Rate Limiting](#rate-limiting)
+7. [Environment Variables](#environment-variables)
+8. [Hosting and Deployment](#hosting-and-deployment-1)
+9. [Security Considerations](#security-considerations)
+10. [Contribution](#contribution)
+11. [License](#license)
+
+---
+
+### Introduction
+
+The AuraHunt API allows administrators and teams to manage and interact with the AuraHunt game platform. You can use this API to:
+- Edit team scores
+- Toggle the status of questions (checked/solved)
+- Upload files related to questions
+- Retrieve game data and team details
+- Securely log in teams and more
+
+### API Base URL
+
+All endpoints in this API are available under the following base URL:
+
+```
+https://aurahunt.quest
+```
+
+### Authentication
+
+Some endpoints require authentication via a **token** to ensure that only authorized users (admin or teams) can access certain functionality. 
+
+#### Admin Token
+
+- For secure admin operations like editing scores or toggling statuses, the `ADMIN_REQUEST_TOKEN` must be provided in the request body. The token is stored in your environment variables (`.env`).
+
+#### Team Authentication
+
+- Teams must log in with their `teamid` and `password` to obtain a valid `token` for authenticated operations like file uploads and score management.
+
+### CORS Configuration
+
+By default, the API allows requests from a specific origin (`https://aurahunt.quest`). You can change this to allow all domains or configure specific domains for security.
+
+#### Public Access CORS Configuration
+
+To allow all domains to access the API:
+
+```js
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+```
+
+For specific origins:
+
+```js
+const allowedOrigins = ['https://example1.com', 'https://example2.com'];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+```
+
+### Endpoints
+
+#### 1. Edit Score
+
+**Endpoint**: `POST /editscore`
+
+- **Description**: Allows admins to update the score of a team.
+- **Request Body**:
+    ```json
+    {
+      "token": "admin-token",
+      "id": "team-id",
+      "aura": 50
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "Score updated successfully" }
+        ```
+    - Error:
+        ```json
+        { "message": "Failed to update scores", "error": "Error message" }
+        ```
+
+#### 2. Toggle Checked Status
+
+**Endpoint**: `POST /toggleChecked`
+
+- **Description**: Toggles the checked status of a specific question.
+- **Request Body**:
+    ```json
+    {
+      "token": "admin-token",
+      "id": "team-id",
+      "questionId": "question-id"
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "Checked status updated successfully" }
+        ```
+    - Error:
+        ```json
+        { "message": "Failed to toggle checked status", "error": "Error message" }
+        ```
+
+#### 3. Toggle Solved Status
+
+**Endpoint**: `POST /toggleSolved`
+
+- **Description**: Toggles the solved status of a specific question.
+- **Request Body**:
+    ```json
+    {
+      "token": "admin-token",
+      "id": "team-id",
+      "questionId": "question-id"
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "solved status updated successfully" }
+        ```
+    - Error:
+        ```json
+        { "message": "Failed to toggle solved status", "error": "Error message" }
+        ```
+
+#### 4. Correct Question
+
+**Endpoint**: `POST /correctQuestion`
+
+- **Description**: Marks a question as solved if the answer is correct, or deducts points if incorrect.
+- **Request Body**:
+    ```json
+    {
+      "teamId": "team-id",
+      "gameId": "game-id",
+      "correct": true
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "CHECKED" }
+        ```
+    - Error:
+        ```json
+        { "message": "Internal server error" }
+        ```
+
+#### 5. Upload File
+
+**Endpoint**: `POST /upload`
+
+- **Description**: Allows teams to upload files related to a specific question.
+- **Request Body**:
+    ```json
+    {
+      "teamid": "team-id",
+      "teamtoken": "team-token",
+      "gamename": "game-name",
+      "gameId": "game-id"
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "File uploaded successfully", "url": "file-url" }
+        ```
+    - Error:
+        ```json
+        { "message": "Failed to upload file" }
+        ```
+
+#### 6. Team Login
+
+**Endpoint**: `POST /teamlogin`
+
+- **Description**: Allows a team to log in with their credentials.
+- **Request Body**:
+    ```json
+    {
+      "team": "team-id",
+      "password": "team-password"
+    }
+    ```
+- **Response**:
+    - Success:
+        ```json
+        { "message": "Team logged in successfully", "token": "team-token" }
+        ```
+    - Error:
+        ```json
+        { "message": "Wrong password" }
+        ```
+
+#### 7. Generate JSON
+
+**Endpoint**: `GET /generate-json`
+
+- **Description**: Generates a JSON containing all teams and their current scores.
+- **Response**:
+    ```json
+    [
+      { "id": "team-id", "score": 100 }
+    ]
+    ```
+
+#### 8. Fetch Team Aura Scores
+
+**Endpoint**: `GET /MyTeamAuraScores/:id`
+
+- **Description**: Fetches the score and questions for a specific team.
+- **Response**:
+    ```json
+    {
+      "score": {
+        "id": "team-id",
+        "score": 200,
+        "questions": [
+          {
+            "id": "question-id",
+            "attempts": [],
+            "score": 10,
+            "deduction": 5,
+            "checked": false,
+            "solved": true
+          }
+        ]
+      }
+    }
+    ```
+
+### Rate Limiting
+
+To prevent abuse, a rate-limiting policy is enforced on the API. The limit is set to **100 requests per 15 minutes** per IP address. Exceeding this limit will result in a `429 Too Many Requests` response.
+
+### Environment Variables
+
+The following environment variables need to be set:
+
+- `ADMIN_REQUEST_TOKEN`: Admin token for secure API access.
+- `FIREBASE_CREDENTIALS_PATH`: Path to your Firebase credentials file.
+
+**Example `.env` file**:
+```plaintext
+ADMIN_REQUEST_TOKEN=your-admin-token
+FIREBASE_CREDENTIALS_PATH=/path/to/your/firebase/credentials.json
+```
+
+### Hosting and Deployment
+
+This API can be hosted on various platforms such as:
+
+- **Heroku**: [Heroku Documentation](https://devcenter.heroku.com/articles/git)
+- **AWS**: [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/)
+- **Google Cloud**: [Google Cloud App Engine](https://cloud.google.com/appengine)
+
+To deploy on your chosen platform, follow the deployment instructions specific to that platform.
+
+### Security Considerations
+
+- **Authentication**: All sensitive endpoints require token-based authentication (admin or team tokens).
+- **Environment Variables**: Ensure that sensitive keys (like Firebase credentials and admin tokens) are never exposed in the source code.
+- **CORS**: Review and restrict CORS to trusted domains to avoid unauthorized access.
+
+### Contribution
+
+Contributions are welcome! To contribute to this project:
+
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Submit a pull request.
+
+Please ensure that any contributions align with our coding style and pass existing tests.
+
+### License
+
+This project is released under the [MIT License](LICENSE). Feel free to use and modify this software according to the terms in the license.
+
+---
+
+> **Note**: This documentation provides a high-level overview. For more in-depth information on request structures, server responses, and edge cases, refer to the source code and comments within the repository.
+
+Happy hacking!
